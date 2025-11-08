@@ -1,0 +1,1 @@
+smbclient -L 10.0.8.11 -N --> primer escaneo para ver si nos lista algo sin usuarios ni contraseña 
