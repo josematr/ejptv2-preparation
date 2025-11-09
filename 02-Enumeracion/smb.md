@@ -1,8 +1,8 @@
 # SMB — notas prácticas
 
-**Autor:** Josema — [LinkedIn](https://www.linkedin.com/in/tu-usuario/)
+**Autor:** Josema — [LinkedIn](https://www.linkedin.com/in/jose-manueltr/)
 **Fuente:** Curso "El Rincón del Hacker" (Mario) — apuntes personales
-**Estado:** **LAB** (solo para entornos autorizados)
+
 
 > ⚠️ Uso legal: estos apuntes son solo para laboratorios y entornos autorizados. No los uses contra sistemas reales sin permiso.
 
