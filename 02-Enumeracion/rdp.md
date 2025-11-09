@@ -1,8 +1,8 @@
 # RDP — notas prácticas
 
-**Autor:** Josema — [LinkedIn](https://www.linkedin.com/in/tu-usuario/)
+**Autor:** Josema — [LinkedIn](https://www.linkedin.com/in/jose-manueltr/)
 **Fuente:** Curso "El Rincón del Hacker" (Mario) — apuntes personales
-**Estado:** **LAB** (solo para entornos autorizados)
+
 
 > ⚠️ Uso legal: estos apuntes son solo para laboratorios y entornos autorizados. No los uses contra sistemas reales sin permiso.
 
@@ -59,7 +59,7 @@ rdesktop -u mario -p 123123 10.0.8.11
 
 ---
 
-## 4) Fuerza bruta / pruebas de credenciales (solo en LAB)
+## 4) Fuerza bruta / pruebas de credenciales 
 
 Herramientas: `ncrack`, `hydra`, `rdp-sec-checkers`.
 
@@ -132,7 +132,3 @@ run
 *Pequeño tip técnico:* si ves `TLS` como método de seguridad, FreeRDP con `/cert:ignore` suele ser suficiente para laboratorio; en entornos reales verifica certificados y evita ignorarlos.
 
 ---
-
-*Status:* listo para pegar en `04-Explotacion-Host/rdp.md`.
-
-*Si quieres, lo reduzco a un `cheatsheet` con solo 6-8 comandos esenciales para tener en el bolsillo.*
