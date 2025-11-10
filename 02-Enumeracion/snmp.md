@@ -1,10 +1,7 @@
 # SNMP — notas prácticas
 
-**Autor:** Josema — [LinkedIn](https://www.linkedin.com/in/tu-usuario/)
+**Autor:** Josema — [LinkedIn](https://www.linkedin.com/in/jose-manueltr/)
 **Fuente:** Curso "El Rincón del Hacker" (Mario) — apuntes personales
-**Estado:** **LAB** (solo para entornos autorizados)
-
-> ⚠️ Uso legal: solo en laboratorios o entornos autorizados. Nada de atacar sistemas reales sin permiso.
 
 ---
 
