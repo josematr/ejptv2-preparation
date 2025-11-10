@@ -148,6 +148,3 @@ snmpwalk -v 2c -c security 10.0.8.14
 wfuzz -c -z file,/usr/share/wordlists/wfuzz/general/spanish.txt --hc 404 -H "Host: FUZZ.chaincorp.nyx" http://10.0.8.14/
 ```
 
----
-
-*Status:* listo para pegar en `04-Explotacion-Host/snmp.md`. ¿Quieres que haga también la versión "cheatsheet" minimal con solo 4-6 líneas?
