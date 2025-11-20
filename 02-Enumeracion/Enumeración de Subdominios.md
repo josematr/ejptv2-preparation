@@ -1,4 +1,4 @@
-# 07 - Explotación LFI → PHP Filter Chain → RCE → Reverse Shell (utils.chaincorp.nyx)
+#  - Explotación LFI → PHP Filter Chain → RCE → Reverse Shell (utils.chaincorp.nyx)
 
 ## 1. Añadir subdominio al /etc/hosts
 
