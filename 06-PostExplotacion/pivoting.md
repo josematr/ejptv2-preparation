@@ -154,7 +154,7 @@ Local 0.0.0.0:999 → Remote 10.0.9.6:80
 Ahora en mi Kali puedo abrir:
 
 ```bash
-http://localhost:999
+(http://10.0.8.11:999/)
 ```
 
 Y ver el servicio web que realmente está en **10.0.9.6:80**.
