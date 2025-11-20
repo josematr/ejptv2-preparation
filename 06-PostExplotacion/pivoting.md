@@ -1,4 +1,4 @@
-# **06 - Pivoting entre Windows y Linux con Metasploit (via EternalBlue y PortProxy)**
+# ** - Pivoting entre Windows y Linux con Metasploit (via EternalBlue y PortProxy)**
 
 ## **1. Introducción**
 
